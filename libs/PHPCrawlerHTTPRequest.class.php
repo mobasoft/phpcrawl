@@ -453,12 +453,19 @@ class PHPCrawlerHTTPRequest
       //$this->socket = @fsockopen ($protocol_prefix.$ip_address, $this->url_parts["port"], $error_code, $error_str, $this->socketConnectTimeout);
       
       // If ssl -> perform Server name indication
-      if ($this->url_parts["protocol"] == "https://")
-        $context = stream_context_create(array('ssl' => array('SNI_server_name' => $this->url_parts["host"])));
-      else
-        $context = stream_context_create(array());
-      
-      $this->socket = @stream_socket_client($protocol_prefix.$ip_address.":".$this->url_parts["port"], $error_code, $error_str,
+		if($this->url_parts['protocol'] == 'https://'){
+			$context = stream_context_create(array(
+				'ssl' => array(
+					'SNI_server_name' => $this->url_parts['host'],
+					'verify_peer' => false,
+					'verify_peer_name' => false
+				)
+			));
+		}else{
+			$context = stream_context_create(array());
+		}
+
+		$this->socket = stream_socket_client($protocol_prefix.$ip_address.":".$this->url_parts["port"], $error_code, $error_str,
                                            $this->socketConnectTimeout, STREAM_CLIENT_CONNECT, $context);
     }
     
@@ -523,7 +530,7 @@ class PHPCrawlerHTTPRequest
       socket_set_timeout($this->socket, $this->socketReadTimeout);
       
       // Read from socket
-      $line_read = fgets($this->socket, 1024); // Das @ ist da um die blöde "SSL fatal protocol error"-Warnung zu unterdrücken, 
+      $line_read = fgets($this->socket, 1024); // Das @ ist da um die blï¿½de "SSL fatal protocol error"-Warnung zu unterdrï¿½cken, 
                                                // die keinen Sinn macht
       if ($server_responded == false)
       {
@@ -618,7 +625,7 @@ class PHPCrawlerHTTPRequest
       socket_set_timeout($this->socket, $this->socketReadTimeout);
       
       // Read from socket
-      $line_read = @fread($this->socket, 1024); // Das @ ist da um die blöde "SSL fatal protocol error"-Warnung zu unterdrücken, 
+      $line_read = @fread($this->socket, 1024); // Das @ ist da um die blï¿½de "SSL fatal protocol error"-Warnung zu unterdrï¿½cken, 
                                                 // die keinen Sinn macht
       
       // Check socket-status
@@ -769,9 +776,9 @@ class PHPCrawlerHTTPRequest
    * Prepares the given HTTP-query-string for the HTTP-request.
    *
    * HTTP-query-strings always should be utf8-encoded and urlencoded afterwards.
-   * So "/path/file?test=tatütata" will be converted to "/path/file?test=tat%C3%BCtata":
+   * So "/path/file?test=tatï¿½tata" will be converted to "/path/file?test=tat%C3%BCtata":
    *
-   * @param stirng The quetry-string (like "/path/file?test=tatütata")
+   * @param stirng The quetry-string (like "/path/file?test=tatï¿½tata")
    * @return string
    */
   protected function prepareHTTPRequestQuery($query)
